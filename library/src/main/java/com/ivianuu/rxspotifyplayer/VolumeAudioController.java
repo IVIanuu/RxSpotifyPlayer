@@ -153,7 +153,7 @@ class VolumeAudioController implements AudioController {
 
     void setVolume(float volume) {
         VolumeAudioController.volume = volume;
-        if (audioTrack != null && audioTrack.getState() != 0 && isAudioTrackPlaying()) {
+        if (audioTrack != null) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 audioTrack.setVolume(volume);
             } else {

@@ -9,7 +9,9 @@ android {
         targetSdkVersion 26
         versionCode 1
         versionName "1.0"
+
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
     }
     buildTypes {
         release {
@@ -20,14 +22,8 @@ android {
 }
 
 dependencies {
-    // Android support
-    compile 'com.android.support:support-annotations:25.4.0'
-
-    // RxJava
-    compile "io.reactivex.rxjava2:rxjava:2.1.0"
-
-    // SpotifySdk
-    compile project(':spotifysdk')
+    // RxSpotifyPlayer
+    compile project(':library')
 
     // Compile libs
     compile fileTree(dir: 'libs', include: ['*.jar'])

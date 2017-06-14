@@ -1,1 +1,1 @@
-include ':sample', ':library', ':spotifysdk'
+include ':sample', ':library', ':extensions', ':spotifysdk'

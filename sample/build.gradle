@@ -1,7 +1,4 @@
 apply plugin: 'com.android.application'
-apply plugin: 'com.github.dcendents.android-maven'
-
-group='com.github.ivianuu'
 
 android {
     compileSdkVersion 25
@@ -23,11 +20,15 @@ android {
 }
 
 dependencies {
-    // RxSpotifyPlayer
-    compile project(':library')
-
     // Android Support
     compile 'com.android.support:appcompat-v7:25.4.0'
+
+    // RxSpotifyPlayer
+    compile project(':library')
+    compile project(':extensions')
+
+    // Spotify Auth
+    compile 'com.spotify.android:auth:1.0.0-alpha'
 
     // Compile libs
     compile fileTree(dir: 'libs', include: ['*.jar'])
