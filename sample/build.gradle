@@ -18,7 +18,9 @@ android {
         }
     }
 }
-
+repositories {
+    flatDir { dirs 'libs' }
+}
 dependencies {
     // Android Support
     compile 'com.android.support:appcompat-v7:25.4.0'
