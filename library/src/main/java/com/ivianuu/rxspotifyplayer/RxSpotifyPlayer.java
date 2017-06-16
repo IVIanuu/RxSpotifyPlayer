@@ -75,10 +75,12 @@ public class RxSpotifyPlayer {
         SpotifyPlayer.Builder builder = new SpotifyPlayer.Builder(config)
                 .setAudioController(audioController);
 
-        player = Spotify.getPlayer(
+        Spotify.getPlayer(
                 builder, this, new SpotifyPlayer.InitializationObserver() {
                     @Override
                     public void onInitialized(SpotifyPlayer spotifyPlayer) {
+                        player = spotifyPlayer;
+
                         // we need to wait for login in order to play tracks
                         player.addConnectionStateCallback(new ConnectionStateCallback() {
                             @Override
