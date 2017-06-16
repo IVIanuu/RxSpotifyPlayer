@@ -18,9 +18,7 @@ android {
         }
     }
 }
-repositories {
-    flatDir { dirs 'libs' }
-}
+
 dependencies {
     // Android Support
     compile 'com.android.support:appcompat-v7:25.4.0'
@@ -31,9 +29,6 @@ dependencies {
 
     // Spotify Auth
     compile 'com.spotify.android:auth:1.0.0-alpha'
-
-    // SpotifySdk
-    compile 'com.spotify.sdk:spotify-player-24-noconnect-2.20b@aar'
 
     // Compile libs
     compile fileTree(dir: 'libs', include: ['*.jar'])
