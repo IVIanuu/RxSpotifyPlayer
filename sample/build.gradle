@@ -30,6 +30,9 @@ dependencies {
     // Spotify Auth
     compile 'com.spotify.android:auth:1.0.0-alpha'
 
+    // SpotifySdk
+    compile 'com.spotify.sdk:spotify-player-24-noconnect-2.20b@aar'
+
     // Compile libs
     compile fileTree(dir: 'libs', include: ['*.jar'])
 

@@ -27,7 +27,7 @@ dependencies {
     compile "io.reactivex.rxjava2:rxjava:2.1.0"
 
     // SpotifySdk
-    compile project(':spotifysdk')
+    compile 'com.spotify.sdk:spotify-player-24-noconnect-2.20b@aar'
 
     // Compile libs
     compile fileTree(dir: 'libs', include: ['*.jar'])

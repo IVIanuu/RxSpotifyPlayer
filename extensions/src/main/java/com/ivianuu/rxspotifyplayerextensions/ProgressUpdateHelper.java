@@ -1,62 +1,73 @@
 package com.ivianuu.rxspotifyplayerextensions;
 
-import android.os.Handler;
-import android.os.Message;
-import android.support.annotation.NonNull;
+import android.support.annotation.MainThread;
 
 import com.ivianuu.rxspotifyplayer.PlaybackState;
 
+import java.util.concurrent.TimeUnit;
+
 import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.annotations.NonNull;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
-import io.reactivex.subjects.BehaviorSubject;
+import io.reactivex.functions.Function;
+import io.reactivex.functions.Predicate;
 
 /**
  * @author Manuel Wrage (IVIanuu)
  */
-public class ProgressUpdateHelper extends Handler {
+public class ProgressUpdateHelper {
 
-    private static final int MESSAGE_REFRESH_PROGRESS_VIEWS = 1;
+    /**
+     * Returns an observable which loops in a 1 second interval
+     */
+    public static Observable<PlaybackProgress> from(final Observable<PlaybackState> playbackStateObservable) {
+        return Observable.create(new ObservableOnSubscribe<PlaybackProgress>() {
 
-    private static final int UPDATE_INTERVAL_PAUSED = 500;
-    private static final int UPDATE_INTERVAL_PLAYING = 1000;
-    private static final int MIN_INTERVAL = 20;
+            private PlaybackState playbackState;
 
-    private PlaybackState playbackState;
-
-    public ProgressUpdateHelper(Observable<PlaybackState> playbackState) {
-        playbackState.subscribe(new Consumer<PlaybackState>() {
             @Override
-            public void accept(@io.reactivex.annotations.NonNull PlaybackState playbackState) throws Exception {
-                ProgressUpdateHelper.this.playbackState = playbackState;
+            public void subscribe(@NonNull final ObservableEmitter<PlaybackProgress> e) throws Exception {
+                // subscribe
+                playbackStateObservable
+                        .takeUntil(new Predicate<PlaybackState>() {
+                            @Override
+                            public boolean test(@NonNull PlaybackState playbackState) throws Exception {
+                                return e.isDisposed(); // complete if disposed
+                            }
+                        })
+                        .subscribe(new Consumer<PlaybackState>() {
+                            @Override
+                            public void accept(@NonNull PlaybackState newState) throws Exception {
+                                playbackState = newState; // update playback state
+                            }
+                        });
+
+                // loop
+                Observable.interval(1000, TimeUnit.MILLISECONDS)
+                        .takeUntil(new Predicate<Long>() {
+                            @Override
+                            public boolean test(@NonNull Long aLong) throws Exception {
+                                return e.isDisposed(); // complete if disposed
+                            }
+                        })
+                        .map(new Function<Long, PlaybackProgress>() {
+                            @Override
+                            public PlaybackProgress apply(@NonNull Long aLong) throws Exception {
+                                // create object
+                                return new PlaybackProgress(playbackState.getDuration(), playbackState.getEstimatedProgress());
+                            }
+                        })
+                        .subscribe(new Consumer<PlaybackProgress>() {
+                            @Override
+                            public void accept(@NonNull PlaybackProgress playbackProgress) throws Exception {
+                                // pass to emitter
+                                e.onNext(playbackProgress);
+                            }
+                        });
             }
         });
     }
-
-    private void queueNextRefresh(long delay) {
-        Message obtainMessage = obtainMessage(MESSAGE_REFRESH_PROGRESS_VIEWS);
-        removeMessages(MESSAGE_REFRESH_PROGRESS_VIEWS);
-        sendMessageDelayed(obtainMessage, delay);
-    }
-
-    private int refreshProgressViews() {
-        int duration = playbackState.getDuration();
-        int progress = playbackState.getEstimatedProgress();
-
-        playbackProgressSubject.onNext(new PlaybackProgress(duration, progress));
-        return !playbackState.isPlaying() ? UPDATE_INTERVAL_PAUSED : Math.max(MIN_INTERVAL, 1000 - (progress % UPDATE_INTERVAL_PLAYING));
-    }
-
-    @Override
-    public void handleMessage(@NonNull Message msg) {
-        super.handleMessage(msg);
-        if (msg.what == MESSAGE_REFRESH_PROGRESS_VIEWS) {
-            queueNextRefresh((long) refreshProgressViews());
-        }
-    }
-
-    private final BehaviorSubject<PlaybackProgress> playbackProgressSubject = BehaviorSubject.create();
-    public Observable<PlaybackProgress> playbackProgress() {
-        return playbackProgressSubject;
-    }
-
 }

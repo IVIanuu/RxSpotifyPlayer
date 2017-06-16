@@ -1,7 +1,6 @@
 package com.ivianuu.rxspotifyplayer.sample;
 
 import android.content.Intent;
-import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -11,14 +10,14 @@ import android.widget.Toast;
 
 import com.ivianuu.rxspotifyplayer.PlaybackState;
 import com.ivianuu.rxspotifyplayer.RxSpotifyPlayer;
+import com.ivianuu.rxspotifyplayerextensions.AudioFocusHelper;
 import com.ivianuu.rxspotifyplayerextensions.PlaybackProgress;
 import com.ivianuu.rxspotifyplayerextensions.ProgressUpdateHelper;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
-import com.spotify.sdk.android.player.PlaybackBitrate;
+import com.spotify.sdk.android.player.Error;
 
-import io.reactivex.ObservableSource;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.functions.Action;
 import io.reactivex.functions.Consumer;
@@ -29,16 +28,15 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String CLIENT_ID = "2eadca5243d5475b9f8003088b2a170b";
     private static final String REDIRECT_URI = "rxspotifyplayer://callback";
-    private static final String[] SCOPES = new String[]{"streaming"};
+    private static final String[] SCOPES = new String[]{ "streaming" };
 
     private RxSpotifyPlayer player;
+    private AudioFocusHelper audioFocusHelper;
 
     private Button playPauseButton;
     private Button volume;
     private SeekBar progressSeekBar;
     private boolean quieter;
-
-    private PlaybackState playbackState = PlaybackState.extractFromPlayer(null);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +47,16 @@ public class MainActivity extends AppCompatActivity {
         playPauseButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                player.playPause().subscribe();
+                if (player.getPlaybackState().isPlaying()) {
+                    player.pause().subscribe();
+                    audioFocusHelper.abandonFocus(); // abandon focus
+                } else {
+                    if (audioFocusHelper.requestAudioFocus()) {
+                        player.resume().subscribe();
+                    } else {
+                        Toast.makeText(MainActivity.this, "Granting focus denied", Toast.LENGTH_SHORT).show();
+                    }
+                }
             }
         });
 
@@ -98,22 +105,19 @@ public class MainActivity extends AppCompatActivity {
 
         player = new RxSpotifyPlayer(this, CLIENT_ID);
 
-        ProgressUpdateHelper progressUpdateHelper = new ProgressUpdateHelper(player.playbackState());
-        progressUpdateHelper.playbackProgress()
-                .subscribe(new Consumer<PlaybackProgress>() {
-                    @Override
-                    public void accept(@NonNull PlaybackProgress playbackProgress) throws Exception {
-                        progressSeekBar.setMax(playbackProgress.getDuration());
-                        progressSeekBar.setProgress(playbackProgress.getProgress());
-                    }
-                });
-
         player.playbackState()
                 .subscribe(new Consumer<PlaybackState>() {
                     @Override
                     public void accept(@NonNull PlaybackState playbackState) throws Exception {
-                        MainActivity.this.playbackState = playbackState;
                         playPauseButton.setText(playbackState.isPlaying() ? "pause" : "resume");
+                    }
+                });
+
+        player.errors()
+                .subscribe(new Consumer<Error>() {
+                    @Override
+                    public void accept(@NonNull Error error) throws Exception {
+
                     }
                 });
 
@@ -127,6 +131,17 @@ public class MainActivity extends AppCompatActivity {
                                 Toast.makeText(MainActivity.this, "playing next track", Toast.LENGTH_SHORT).show();
                             }
                         });
+                    }
+                });
+
+        audioFocusHelper = new AudioFocusHelper(this, player);
+
+        ProgressUpdateHelper.from(player.playbackState())
+                .subscribe(new Consumer<PlaybackProgress>() {
+                    @Override
+                    public void accept(@NonNull PlaybackProgress playbackProgress) throws Exception {
+                        progressSeekBar.setMax(playbackProgress.getDuration());
+                        progressSeekBar.setProgress(playbackProgress.getProgress());
                     }
                 });
 
@@ -155,23 +170,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void onAuthComplete(String accessToken) {
-        player.init(accessToken)
+        if (!audioFocusHelper.requestAudioFocus()) {
+            Toast.makeText(this, "no focus", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        player.init(accessToken) // init player
                 .andThen(player.play("5atzkSaRuwgXiPDRi9qyKz")) // start playing
-                .andThen(player.seekTo(380000)) // seek
+                .andThen(player.seekTo(180000)) // seek
                 .subscribe(new Action() {
                     @Override
                     public void run() throws Exception {
                         Toast.makeText(MainActivity.this, "Success", Toast.LENGTH_SHORT).show();
-
-                        final Handler handler = new Handler();
-                        handler.postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                progressSeekBar.setMax(playbackState.getDuration());
-                                progressSeekBar.setProgress(playbackState.getEstimatedProgress());
-                                handler.postDelayed(this, 1000);
-                            }
-                        }, 1000);
                     }
                 }, new Consumer<Throwable>() {
                     @Override
@@ -188,5 +197,6 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         // clean up
         player.release();
+        audioFocusHelper.abandonFocus();
     }
 }

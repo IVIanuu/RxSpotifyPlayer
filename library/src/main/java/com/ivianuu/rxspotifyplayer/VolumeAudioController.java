@@ -16,7 +16,6 @@ import java.util.concurrent.RejectedExecutionException;
 /**
  * Author IVIanuu.
  */
-
 class VolumeAudioController implements AudioController {
 
     private static final int AUDIO_BUFFER_SIZE_SAMPLES = 4096;

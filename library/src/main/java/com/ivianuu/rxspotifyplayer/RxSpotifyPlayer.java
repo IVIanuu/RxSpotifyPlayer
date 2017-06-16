@@ -4,9 +4,9 @@ import android.content.Context;
 import android.net.NetworkInfo;
 import android.support.annotation.FloatRange;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import com.spotify.sdk.android.player.Config;
+import com.spotify.sdk.android.player.ConnectionStateCallback;
 import com.spotify.sdk.android.player.Connectivity;
 import com.spotify.sdk.android.player.Error;
 import com.spotify.sdk.android.player.PlaybackBitrate;
@@ -27,7 +27,7 @@ import io.reactivex.subjects.PublishSubject;
  */
 public class RxSpotifyPlayer {
 
-    public static final String URI_PREFIX = "spotify:track:";
+    private static final String URI_PREFIX = "spotify:track:";
 
     private Context context;
     private String clientId;
@@ -44,7 +44,8 @@ public class RxSpotifyPlayer {
         audioController = new VolumeAudioController();
 
         // initial value
-        playbackStateSubject.onNext(getPlaybackState());
+        playbackState = getPlaybackState();
+        playbackStateSubject.onNext(playbackState);
     }
 
     // INIT
@@ -79,7 +80,7 @@ public class RxSpotifyPlayer {
                     @Override
                     public void onInitialized(SpotifyPlayer spotifyPlayer) {
                         // we need to wait for login in order to play tracks
-                        player.addConnectionStateCallback(new SimpleConnectionStateCallback(){
+                        player.addConnectionStateCallback(new ConnectionStateCallback() {
                             @Override
                             public void onLoggedIn() {
                                 // ready to play
@@ -96,8 +97,14 @@ public class RxSpotifyPlayer {
                                 if (!e.isDisposed()) {
                                     e.onError(new Throwable(error.name()));
                                 }
-                                player.removeConnectionStateCallback(this); // clean
+                                player.removeConnectionStateCallback(this); // clean;
                             }
+
+                            @Override public void onLoggedOut() {} // ignore
+
+                            @Override public void onTemporaryError() {} // ignore
+
+                            @Override public void onConnectionMessage(String s) {}  // ignore
                         });
                     }
 
@@ -131,7 +138,7 @@ public class RxSpotifyPlayer {
 
     /**
      * Plays the spotify id or uri
-     * @param playContext you can pass here a track uri or id
+     * @param playContext you can pass a track uri or id
      */
     public Completable play(@NonNull String playContext) {
         final String uri;
@@ -147,16 +154,22 @@ public class RxSpotifyPlayer {
                     player.playUri(new Player.OperationCallback() {
                         @Override
                         public void onSuccess() {
-                            e.onComplete();
+                            if (!e.isDisposed()) {
+                                e.onComplete();
+                            }
                         }
 
                         @Override
                         public void onError(Error error) {
-                            e.onError(new Throwable(error.name()));
+                            if (!e.isDisposed()) {
+                                e.onError(new Throwable(error.name()));
+                            }
                         }
                     }, uri, 0, 0);
                 } else {
-                    e.onError(new Throwable(Error.kSpErrorUninitialized.name()));
+                    if (!e.isDisposed()) {
+                        e.onError(new Throwable(Error.kSpErrorUninitialized.name()));
+                    }
                 }
             }
         });
@@ -175,16 +188,22 @@ public class RxSpotifyPlayer {
                     player.pause(new Player.OperationCallback() {
                         @Override
                         public void onSuccess() {
-                            e.onComplete();
+                            if (!e.isDisposed()) {
+                                e.onComplete();
+                            }
                         }
 
                         @Override
                         public void onError(Error error) {
-                            e.onError(new Throwable(error.name()));
+                            if (!e.isDisposed()) {
+                                e.onError(new Throwable(error.name()));
+                            }
                         }
                     });
                 } else {
-                    e.onError(new Throwable(Error.kSpErrorUninitialized.name()));
+                    if (!e.isDisposed()) {
+                        e.onError(new Throwable(Error.kSpErrorUninitialized.name()));
+                    }
                 }
             }
         });
@@ -203,16 +222,22 @@ public class RxSpotifyPlayer {
                     player.resume(new Player.OperationCallback() {
                         @Override
                         public void onSuccess() {
-                            e.onComplete();
+                            if (!e.isDisposed()) {
+                                e.onComplete();
+                            }
                         }
 
                         @Override
                         public void onError(Error error) {
-                            e.onError(new Throwable(error.name()));
+                            if (!e.isDisposed()) {
+                                e.onError(new Throwable(error.name()));
+                            }
                         }
                     });
                 } else {
-                    e.onError(new Throwable(Error.kSpErrorUninitialized.name()));
+                    if (!e.isDisposed()) {
+                        e.onError(new Throwable(Error.kSpErrorUninitialized.name()));
+                    }
                 }
             }
         });
@@ -224,7 +249,7 @@ public class RxSpotifyPlayer {
      * Resumes or pauses the playback based on the playback state
      */
     public Completable playPause() {
-        if (isPlaying()) {
+        if (getPlaybackState().isPlaying()) {
             return pause();
         } else {
             return resume();
@@ -244,17 +269,23 @@ public class RxSpotifyPlayer {
                     player.seekToPosition(new Player.OperationCallback() {
                         @Override
                         public void onSuccess() {
-                            e.onComplete();
+                            if (!e.isDisposed()) {
+                                e.onComplete();
+                            }
                             playbackStateSubject.onNext(PlaybackState.extractFromPlayer(player));
                         }
 
                         @Override
                         public void onError(Error error) {
-                            e.onError(new Throwable(error.name()));
+                            if (!e.isDisposed()) {
+                                e.onError(new Throwable(error.name()));
+                            }
                         }
                     }, position);
                 } else {
-                    e.onError(new Throwable(Error.kSpErrorUninitialized.name()));
+                    if (!e.isDisposed()) {
+                        e.onError(new Throwable(Error.kSpErrorUninitialized.name()));
+                    }
                 }
             }
         });
@@ -271,9 +302,13 @@ public class RxSpotifyPlayer {
             public void subscribe(@io.reactivex.annotations.NonNull CompletableEmitter e) throws Exception {
                 if (isInitialized()) {
                     audioController.setVolume(volume);
-                    e.onComplete();
+                    if (!e.isDisposed()) {
+                        e.onComplete();
+                    }
                 } else {
-                    e.onError(new Throwable(Error.kSpErrorUninitialized.name()));
+                    if (!e.isDisposed()) {
+                        e.onError(new Throwable(Error.kSpErrorUninitialized.name()));
+                    }
                 }
             }
         });
@@ -298,16 +333,22 @@ public class RxSpotifyPlayer {
                     player.setConnectivityStatus(new Player.OperationCallback() {
                         @Override
                         public void onSuccess() {
-                            e.onComplete();
+                            if (!e.isDisposed()) {
+                                e.onComplete();
+                            }
                         }
 
                         @Override
                         public void onError(Error error) {
-                            e.onError(new Throwable(error.name()));
+                            if (!e.isDisposed()) {
+                                e.onError(new Throwable(error.name()));
+                            }
                         }
                     }, connectivity);
                 } else {
-                    e.onError(new Throwable(Error.kSpErrorUninitialized.name()));
+                    if (!e.isDisposed()) {
+                        e.onError(new Throwable(Error.kSpErrorUninitialized.name()));
+                    }
                 }
             }
         });
@@ -326,16 +367,22 @@ public class RxSpotifyPlayer {
                     player.setPlaybackBitrate(new Player.OperationCallback() {
                         @Override
                         public void onSuccess() {
-                            e.onComplete();
+                            if (!e.isDisposed()) {
+                                e.onComplete();
+                            }
                         }
 
                         @Override
                         public void onError(Error error) {
-                            e.onError(new Throwable(error.name()));
+                            if (!e.isDisposed()) {
+                                e.onError(new Throwable(error.name()));
+                            }
                         }
                     }, playbackBitrate);
                 } else {
-                    e.onError(new Throwable(Error.kSpErrorUninitialized.name()));
+                    if (!e.isDisposed()) {
+                        e.onError(new Throwable(Error.kSpErrorUninitialized.name()));
+                    }
                 }
             }
         });
@@ -354,25 +401,13 @@ public class RxSpotifyPlayer {
     public Observable<PlaybackState> playbackState() { return playbackStateSubject; }
 
     /**
-     * Returs the last known playback state
+     * Returns the last known playback state
      */
     public PlaybackState getPlaybackState() {
         if (playbackState == null) {
             playbackState = PlaybackState.extractFromPlayer(player);
         }
         return playbackState;
-    }
-
-    public boolean isPlaying() {
-        return getPlaybackState().isPlaying();
-    }
-
-    public int getProgress() {
-        return getPlaybackState().getProgress();
-    }
-
-    public int getDuration() {
-        return getPlaybackState().getDuration();
     }
 
     // COMPLETION
@@ -384,6 +419,14 @@ public class RxSpotifyPlayer {
     public Observable<Object> completion() {
         return completionSubject;
     }
+
+    // ERRORS
+
+    private PublishSubject<Error> errorsSubject = PublishSubject.create();
+    /**
+     * Emits on every playback error
+     */
+    public Observable<Error> errors() { return errorsSubject; }
 
     // CALLBACKS
 
@@ -399,7 +442,6 @@ public class RxSpotifyPlayer {
                             && player.getMetadata() != null && player.getMetadata().currentTrack != null) {
                         // track has completed
                         completionSubject.onNext(new Object());
-                        Log.d("testtt", "on completion");
                     }
                     break;
                 case kSpPlaybackNotifyPlay:
@@ -408,7 +450,6 @@ public class RxSpotifyPlayer {
                     if (player.getMetadata() != null && player.getMetadata().currentTrack != null) {
                         playbackState = PlaybackState.extractFromPlayer(player);
                         playbackStateSubject.onNext(playbackState);
-                        Log.d("testtt", "playback state changed");
                     } else {
                         // otherwise set pending change
                         pendingChange = true;
@@ -419,7 +460,6 @@ public class RxSpotifyPlayer {
                     if (pendingChange) {
                         playbackState = PlaybackState.extractFromPlayer(player);
                         playbackStateSubject.onNext(playbackState);
-                        Log.d("testtt", "playback state changed");
                         pendingChange = false;
                     }
                     break;
@@ -428,7 +468,8 @@ public class RxSpotifyPlayer {
 
         @Override
         public void onPlaybackError(Error error) {
-
+            errorsSubject.onNext(error);
         }
     };
+
 }
