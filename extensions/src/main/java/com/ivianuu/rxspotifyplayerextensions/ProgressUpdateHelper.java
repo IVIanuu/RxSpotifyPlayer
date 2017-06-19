@@ -1,16 +1,16 @@
 package com.ivianuu.rxspotifyplayerextensions;
 
 import android.support.annotation.MainThread;
+import android.support.annotation.NonNull;
 
 import com.ivianuu.rxspotifyplayer.PlaybackState;
+import com.ivianuu.rxspotifyplayer.RxSpotifyPlayer;
 
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
-import io.reactivex.annotations.NonNull;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.functions.Predicate;
@@ -20,10 +20,12 @@ import io.reactivex.functions.Predicate;
  */
 public class ProgressUpdateHelper {
 
+    private ProgressUpdateHelper() {}
+
     /**
      * Returns an observable which loops in a 1 second interval
      */
-    public static Observable<PlaybackProgress> from(final Observable<PlaybackState> playbackStateObservable) {
+    public static Observable<PlaybackProgress> witch(@NonNull final RxSpotifyPlayer player) {
         return Observable.create(new ObservableOnSubscribe<PlaybackProgress>() {
 
             private PlaybackState playbackState;
@@ -31,7 +33,7 @@ public class ProgressUpdateHelper {
             @Override
             public void subscribe(@NonNull final ObservableEmitter<PlaybackProgress> e) throws Exception {
                 // subscribe
-                playbackStateObservable
+                player.playbackState()
                         .takeUntil(new Predicate<PlaybackState>() {
                             @Override
                             public boolean test(@NonNull PlaybackState playbackState) throws Exception {
