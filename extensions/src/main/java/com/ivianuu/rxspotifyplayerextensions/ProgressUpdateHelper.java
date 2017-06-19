@@ -25,7 +25,7 @@ public class ProgressUpdateHelper {
     /**
      * Returns an observable which loops in a 1 second interval
      */
-    public static Observable<PlaybackProgress> witch(@NonNull final RxSpotifyPlayer player) {
+    public static Observable<PlaybackProgress> from(@NonNull final Observable<PlaybackState> playbackStateObservable) {
         return Observable.create(new ObservableOnSubscribe<PlaybackProgress>() {
 
             private PlaybackState playbackState;
@@ -33,7 +33,7 @@ public class ProgressUpdateHelper {
             @Override
             public void subscribe(@NonNull final ObservableEmitter<PlaybackProgress> e) throws Exception {
                 // subscribe
-                player.playbackState()
+                playbackStateObservable
                         .takeUntil(new Predicate<PlaybackState>() {
                             @Override
                             public boolean test(@NonNull PlaybackState playbackState) throws Exception {
