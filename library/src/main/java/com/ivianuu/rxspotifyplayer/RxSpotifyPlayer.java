@@ -19,11 +19,6 @@ import io.reactivex.Completable;
 import io.reactivex.CompletableEmitter;
 import io.reactivex.CompletableOnSubscribe;
 import io.reactivex.Observable;
-import io.reactivex.Single;
-import io.reactivex.SingleEmitter;
-import io.reactivex.SingleOnSubscribe;
-import io.reactivex.functions.Action;
-import io.reactivex.functions.Consumer;
 import io.reactivex.subjects.BehaviorSubject;
 import io.reactivex.subjects.PublishSubject;
 
@@ -47,10 +42,6 @@ public class RxSpotifyPlayer {
         this.clientId = clientId;
 
         audioController = new VolumeAudioController();
-
-        // initial value
-        playbackState = getPlaybackState();
-        playbackStateSubject.onNext(playbackState);
     }
 
     // INIT
@@ -94,6 +85,7 @@ public class RxSpotifyPlayer {
                                 if (!e.isDisposed()) {
                                     e.onComplete();
                                 }
+
                                 player.removeConnectionStateCallback(this); // clean
                                 player.addNotificationCallback(notificationCallback); // add notification callback
                             }
@@ -104,6 +96,7 @@ public class RxSpotifyPlayer {
                                 if (!e.isDisposed()) {
                                     e.onError(new Throwable(error.name()));
                                 }
+
                                 player.removeConnectionStateCallback(this); // clean;
                             }
 
@@ -401,7 +394,7 @@ public class RxSpotifyPlayer {
 
     // PLAYBACK STATE
 
-    private BehaviorSubject<PlaybackState> playbackStateSubject = BehaviorSubject.create();
+    private BehaviorSubject<PlaybackState> playbackStateSubject = BehaviorSubject.createDefault(PlaybackState.extractFromPlayer(null));
     /**
      * Emits when the playback state changes
      */
