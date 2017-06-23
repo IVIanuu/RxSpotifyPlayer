@@ -26,7 +26,7 @@ android {
 
 dependencies {
     // RxSpotifyPlayer
-    compile project(':library')
+    compile project(':rxspotifyplayer')
 
     // Compile libs
     compile fileTree(dir: 'libs', include: ['*.jar'])

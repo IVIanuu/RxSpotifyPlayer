@@ -24,7 +24,7 @@ dependencies {
     compile 'com.android.support:appcompat-v7:25.4.0'
 
     // RxSpotifyPlayer
-    compile project(':library')
+    compile project(':rxspotifyplayer')
     compile project(':extensions')
 
     // Spotify Auth
