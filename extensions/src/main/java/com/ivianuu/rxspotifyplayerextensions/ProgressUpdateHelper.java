@@ -1,10 +1,9 @@
 package com.ivianuu.rxspotifyplayerextensions;
 
-import android.support.annotation.MainThread;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 
 import com.ivianuu.rxspotifyplayer.PlaybackState;
-import com.ivianuu.rxspotifyplayer.RxSpotifyPlayer;
 
 import java.util.concurrent.TimeUnit;
 
@@ -16,7 +15,7 @@ import io.reactivex.functions.Function;
 import io.reactivex.functions.Predicate;
 
 /**
- * @author Manuel Wrage (IVIanuu)
+ * Progress update helper
  */
 public class ProgressUpdateHelper {
 
@@ -25,6 +24,7 @@ public class ProgressUpdateHelper {
     /**
      * Returns an observable which loops in a 1 second interval
      */
+    @CheckResult @NonNull
     public static Observable<PlaybackProgress> from(@NonNull final Observable<PlaybackState> playbackStateObservable) {
         return Observable.create(new ObservableOnSubscribe<PlaybackProgress>() {
 

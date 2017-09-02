@@ -2,6 +2,7 @@ package com.ivianuu.rxspotifyplayer;
 
 import android.content.Context;
 import android.net.NetworkInfo;
+import android.support.annotation.CheckResult;
 import android.support.annotation.FloatRange;
 import android.support.annotation.NonNull;
 
@@ -19,7 +20,6 @@ import io.reactivex.Completable;
 import io.reactivex.CompletableEmitter;
 import io.reactivex.CompletableOnSubscribe;
 import io.reactivex.Observable;
-import io.reactivex.functions.Consumer;
 import io.reactivex.subjects.BehaviorSubject;
 import io.reactivex.subjects.PublishSubject;
 
@@ -50,6 +50,7 @@ public class RxSpotifyPlayer {
     /**
      * Initializes the player
      */
+    @CheckResult @NonNull
     public Completable init(@NonNull final String accessToken) {
         return Completable.create(new CompletableOnSubscribe() {
             @Override
@@ -141,6 +142,7 @@ public class RxSpotifyPlayer {
      * Plays the spotify id or uri
      * @param playContext you can pass a track uri or id
      */
+    @CheckResult @NonNull
     public Completable play(@NonNull String playContext) {
         final String uri;
         if (!playContext.contains(URI_PREFIX)) {
@@ -181,6 +183,7 @@ public class RxSpotifyPlayer {
     /**
      * Pauses the current playback
      */
+    @CheckResult @NonNull
     public Completable pause() {
         return Completable.create(new CompletableOnSubscribe() {
             @Override
@@ -215,6 +218,7 @@ public class RxSpotifyPlayer {
     /**
      * Resumes the playback
      */
+    @CheckResult @NonNull
     public Completable resume() {
         return Completable.create(new CompletableOnSubscribe() {
             @Override
@@ -249,6 +253,7 @@ public class RxSpotifyPlayer {
     /**
      * Resumes or pauses the playback based on the playback state
      */
+    @CheckResult @NonNull
     public Completable playPause() {
         if (getPlaybackState().isPlaying()) {
             return pause();
@@ -262,6 +267,7 @@ public class RxSpotifyPlayer {
     /**
      * Seeks to the specified position
      */
+    @CheckResult @NonNull
     public Completable seekTo(final int position) {
         return Completable.create(new CompletableOnSubscribe() {
             @Override
@@ -297,6 +303,7 @@ public class RxSpotifyPlayer {
     /**
      * Sets the volume
      */
+    @CheckResult @NonNull
     public Completable setVolume(@FloatRange(from = 0.0f, to = 1.0f) final float volume) {
         return Completable.create(new CompletableOnSubscribe() {
             @Override
@@ -320,6 +327,7 @@ public class RxSpotifyPlayer {
     /**
      * Sets the connectivity
      */
+    @CheckResult @NonNull
     public Completable setConnectivity(final NetworkInfo info) {
         return Completable.create(new CompletableOnSubscribe() {
             @Override
@@ -360,6 +368,7 @@ public class RxSpotifyPlayer {
     /**
      * Sets the playback bitrate
      */
+    @CheckResult @NonNull
     public Completable setPlaybackBitrate(final PlaybackBitrate playbackBitrate) {
         return Completable.create(new CompletableOnSubscribe() {
             @Override
@@ -399,6 +408,7 @@ public class RxSpotifyPlayer {
     /**
      * Emits when the playback state changes
      */
+    @CheckResult @NonNull
     public Observable<PlaybackState> playbackState() { return playbackStateSubject; }
 
     /**
@@ -417,6 +427,7 @@ public class RxSpotifyPlayer {
     /**
      * Emits when a track completes
      */
+    @CheckResult @NonNull
     public Observable<Object> completion() {
         return completionSubject;
     }
@@ -427,6 +438,7 @@ public class RxSpotifyPlayer {
     /**
      * Emits on every playback error
      */
+    @CheckResult @NonNull
     public Observable<Error> errors() { return errorsSubject; }
 
     // CALLBACKS

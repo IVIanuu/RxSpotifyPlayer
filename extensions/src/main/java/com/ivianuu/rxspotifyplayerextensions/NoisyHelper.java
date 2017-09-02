@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 
 import com.ivianuu.rxspotifyplayer.PlaybackState;
@@ -18,7 +19,7 @@ import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Predicate;
 
 /**
- * @author Manuel Wrage (IVIanuu)
+ * Noisy helper
  */
 public class NoisyHelper {
 
@@ -27,6 +28,7 @@ public class NoisyHelper {
     /**
      * Automatically pauses the playback on becoming noisy
      */
+    @CheckResult @NonNull
     public static Observable<Object> with(@NonNull final Context context, @NonNull final RxSpotifyPlayer player) {
         return Observable.create(new ObservableOnSubscribe<Object>() {
 
