@@ -3,6 +3,6 @@ package com.ivianuu.rxspotifyplayer;
 /**
  * Avoid object creation
  */
-public enum  Notification {
+enum Notification {
     INSTANCE
 }
