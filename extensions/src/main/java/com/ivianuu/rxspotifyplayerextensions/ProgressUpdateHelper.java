@@ -17,9 +17,11 @@ import io.reactivex.functions.Predicate;
 /**
  * Progress update helper
  */
-public class ProgressUpdateHelper {
+public final class ProgressUpdateHelper {
 
-    private ProgressUpdateHelper() {}
+    private ProgressUpdateHelper() {
+        // no instances
+    }
 
     /**
      * Returns an observable which loops in a 1 second interval

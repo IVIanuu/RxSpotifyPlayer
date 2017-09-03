@@ -1,8 +1,8 @@
 package com.ivianuu.rxspotifyplayer.sample;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.SeekBar;
@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        playPauseButton = (Button) findViewById(R.id.play_pause);
+        playPauseButton = findViewById(R.id.play_pause);
         playPauseButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        volume = (Button) findViewById(R.id.volume);
+        volume = findViewById(R.id.volume);
         volume.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        progressSeekBar = (SeekBar) findViewById(R.id.seek_to);
+        progressSeekBar = findViewById(R.id.seek_to);
         progressSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -103,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        player = new RxSpotifyPlayer(this, CLIENT_ID);
+        player = RxSpotifyPlayer.create(this, CLIENT_ID);
 
         player.playbackState()
                 .subscribe(new Consumer<PlaybackState>() {
@@ -134,7 +134,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
-        audioFocusHelper = new AudioFocusHelper(this, player);
+        audioFocusHelper = AudioFocusHelper.create(this, player);
 
         ProgressUpdateHelper.from(player.playbackState())
                 .subscribe(new Consumer<PlaybackProgress>() {

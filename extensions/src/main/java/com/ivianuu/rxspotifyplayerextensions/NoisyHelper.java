@@ -21,9 +21,11 @@ import io.reactivex.functions.Predicate;
 /**
  * Noisy helper
  */
-public class NoisyHelper {
+public final class NoisyHelper {
 
-    private NoisyHelper() {}
+    private NoisyHelper() {
+        // no instances
+    }
 
     /**
      * Automatically pauses the playback on becoming noisy

@@ -2,7 +2,6 @@ package com.ivianuu.rxspotifyplayerextensions;
 
 import android.content.Context;
 import android.media.AudioManager;
-import android.support.annotation.FloatRange;
 import android.support.annotation.NonNull;
 
 import com.ivianuu.rxspotifyplayer.RxSpotifyPlayer;
@@ -15,17 +14,24 @@ import io.reactivex.functions.Consumer;
  */
 public class AudioFocusHelper implements AudioManager.OnAudioFocusChangeListener {
 
-    private AudioManager audioManager;
-    private RxSpotifyPlayer player;
+    private final AudioManager audioManager;
+    private final RxSpotifyPlayer player;
 
     private boolean isDucking;
     private boolean shouldPlayOnFocusGain;
 
     private boolean hasFocus;
 
-    public AudioFocusHelper(@NonNull Context context, @NonNull RxSpotifyPlayer player) {
+    private AudioFocusHelper(Context context, RxSpotifyPlayer player) {
         this.player = player;
         this.audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+    }
+
+    /**
+     * Returns a new audio focus helper
+     */
+    public static AudioFocusHelper create(@NonNull Context context, @NonNull RxSpotifyPlayer player) {
+        return new AudioFocusHelper(context, player);
     }
 
     /**
@@ -79,9 +85,7 @@ public class AudioFocusHelper implements AudioManager.OnAudioFocusChangeListener
                         }
                     }, new Consumer<Throwable>() {
                         @Override
-                        public void accept(@io.reactivex.annotations.NonNull Throwable throwable) throws Exception {
-
-                        }
+                        public void accept(@io.reactivex.annotations.NonNull Throwable throwable) throws Exception {}
                     });
                 }
                 break;
@@ -94,9 +98,7 @@ public class AudioFocusHelper implements AudioManager.OnAudioFocusChangeListener
                         }
                     }, new Consumer<Throwable>() {
                         @Override
-                        public void accept(@io.reactivex.annotations.NonNull Throwable throwable) throws Exception {
-
-                        }
+                        public void accept(@io.reactivex.annotations.NonNull Throwable throwable) throws Exception {}
                     });
                 } else {
                     player.setVolume(1.0f).subscribe(new Action() {
@@ -106,9 +108,7 @@ public class AudioFocusHelper implements AudioManager.OnAudioFocusChangeListener
                         }
                     }, new Consumer<Throwable>() {
                         @Override
-                        public void accept(@io.reactivex.annotations.NonNull Throwable throwable) throws Exception {
-
-                        }
+                        public void accept(@io.reactivex.annotations.NonNull Throwable throwable) throws Exception {}
                     });
                 }
                 break;
@@ -120,9 +120,7 @@ public class AudioFocusHelper implements AudioManager.OnAudioFocusChangeListener
                     }
                 }, new Consumer<Throwable>() {
                     @Override
-                    public void accept(@io.reactivex.annotations.NonNull Throwable throwable) throws Exception {
-
-                    }
+                    public void accept(@io.reactivex.annotations.NonNull Throwable throwable) throws Exception {}
                 });
                 break;
         }

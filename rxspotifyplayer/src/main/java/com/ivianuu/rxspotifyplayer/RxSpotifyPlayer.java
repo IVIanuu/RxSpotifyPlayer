@@ -24,25 +24,37 @@ import io.reactivex.subjects.BehaviorSubject;
 import io.reactivex.subjects.PublishSubject;
 
 /**
- * @author Manuel Wrage (IVIanuu)
+ * Rx spotify player
  */
-public class RxSpotifyPlayer {
+public final class RxSpotifyPlayer {
 
     private static final String URI_PREFIX = "spotify:track:";
 
-    private Context context;
-    private String clientId;
+    private final Context context;
+    private final String clientId;
+
+    private PublishSubject<Object> completionSubject = PublishSubject.create();
+    private PublishSubject<Error> errorsSubject = PublishSubject.create();
+    private BehaviorSubject<PlaybackState> playbackStateSubject = BehaviorSubject.createDefault(PlaybackState.extractFromPlayer(null));
 
     private SpotifyPlayer player;
     private VolumeAudioController audioController;
 
     private PlaybackState playbackState;
 
-    public RxSpotifyPlayer(@NonNull Context context, @NonNull String clientId) {
+    private RxSpotifyPlayer(Context context, String clientId) {
         this.context = context;
         this.clientId = clientId;
 
         audioController = new VolumeAudioController();
+    }
+
+    /**
+     * Returns a new rx spotify player
+     */
+    @NonNull
+    public static RxSpotifyPlayer create(@NonNull Context context, @NonNull String clientId) {
+        return new RxSpotifyPlayer(context, clientId);
     }
 
     // INIT
@@ -67,12 +79,15 @@ public class RxSpotifyPlayer {
             return;
         }
 
+        // config
         Config config = new Config(
                 context, accessToken, clientId);
 
+        // add audio controller
         SpotifyPlayer.Builder builder = new SpotifyPlayer.Builder(config)
                 .setAudioController(audioController);
 
+        // request player
         Spotify.getPlayer(
                 builder, this, new SpotifyPlayer.InitializationObserver() {
                     @Override
@@ -140,7 +155,6 @@ public class RxSpotifyPlayer {
 
     /**
      * Plays the spotify id or uri
-     * @param playContext you can pass a track uri or id
      */
     @CheckResult @NonNull
     public Completable play(@NonNull String playContext) {
@@ -328,13 +342,13 @@ public class RxSpotifyPlayer {
      * Sets the connectivity
      */
     @CheckResult @NonNull
-    public Completable setConnectivity(final NetworkInfo info) {
+    public Completable setConnectivity(@NonNull final NetworkInfo info) {
         return Completable.create(new CompletableOnSubscribe() {
             @Override
             public void subscribe(@io.reactivex.annotations.NonNull final CompletableEmitter e) throws Exception {
                 if (isInitialized()) {
                     Connectivity connectivity;
-                    if (info != null && info.isConnected()) {
+                    if (info.isConnected()) {
                         connectivity = Connectivity.fromNetworkType(info.getType());
                     } else {
                         connectivity = Connectivity.OFFLINE;
@@ -369,7 +383,7 @@ public class RxSpotifyPlayer {
      * Sets the playback bitrate
      */
     @CheckResult @NonNull
-    public Completable setPlaybackBitrate(final PlaybackBitrate playbackBitrate) {
+    public Completable setPlaybackBitrate(@NonNull final PlaybackBitrate playbackBitrate) {
         return Completable.create(new CompletableOnSubscribe() {
             @Override
             public void subscribe(@io.reactivex.annotations.NonNull final CompletableEmitter e) throws Exception {
@@ -398,13 +412,15 @@ public class RxSpotifyPlayer {
         });
     }
 
+    /**
+     * Returns whether the player is initialized
+     */
     public boolean isInitialized() {
         return player != null && player.isLoggedIn();
     }
 
     // PLAYBACK STATE
 
-    private BehaviorSubject<PlaybackState> playbackStateSubject = BehaviorSubject.createDefault(PlaybackState.extractFromPlayer(null));
     /**
      * Emits when the playback state changes
      */
@@ -414,6 +430,7 @@ public class RxSpotifyPlayer {
     /**
      * Returns the last known playback state
      */
+    @NonNull
     public PlaybackState getPlaybackState() {
         if (playbackState == null) {
             playbackState = PlaybackState.extractFromPlayer(player);
@@ -423,7 +440,6 @@ public class RxSpotifyPlayer {
 
     // COMPLETION
 
-    private PublishSubject<Object> completionSubject = PublishSubject.create();
     /**
      * Emits when a track completes
      */
@@ -434,7 +450,6 @@ public class RxSpotifyPlayer {
 
     // ERRORS
 
-    private PublishSubject<Error> errorsSubject = PublishSubject.create();
     /**
      * Emits on every playback error
      */
@@ -454,7 +469,7 @@ public class RxSpotifyPlayer {
                     if (player.getPlaybackState() != null && !player.getPlaybackState().isPlaying
                             && player.getMetadata() != null && player.getMetadata().currentTrack != null) {
                         // track has completed
-                        completionSubject.onNext(new Object());
+                        completionSubject.onNext(Notification.INSTANCE);
                     }
                     break;
                 case kSpPlaybackNotifyPlay:

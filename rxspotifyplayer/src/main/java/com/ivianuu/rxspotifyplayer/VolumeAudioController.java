@@ -16,7 +16,7 @@ import java.util.concurrent.RejectedExecutionException;
 /**
  * Author IVIanuu.
  */
-class VolumeAudioController implements AudioController {
+final class VolumeAudioController implements AudioController {
 
     private static final int AUDIO_BUFFER_SIZE_SAMPLES = 4096;
     private static final int AUDIO_BUFFER_CAPACITY = 81920;
@@ -136,7 +136,7 @@ class VolumeAudioController implements AudioController {
     }
 
     private int writeSamplesToAudioOutput(@NonNull short[] samples, int samplesCount) {
-        if (isAudioTrackPlaying()) {
+        if (audioTrack != null && isAudioTrackPlaying()) {
             int itemsWritten = audioTrack.write(samples, 0, samplesCount);
             if (itemsWritten > 0) {
                 return itemsWritten;

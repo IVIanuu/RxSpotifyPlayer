@@ -7,9 +7,9 @@ import com.spotify.sdk.android.player.Metadata;
 import com.spotify.sdk.android.player.SpotifyPlayer;
 
 /**
- * @author Manuel Wrage (IVIanuu)
+ * Playback state
  */
-public class PlaybackState {
+public final class PlaybackState {
 
     private boolean playing;
     private int duration;
@@ -17,7 +17,7 @@ public class PlaybackState {
     private String uri;
     private long timestamp;
 
-    public PlaybackState(boolean playing, int duration, int progress, @NonNull String uri, long timestamp) {
+    PlaybackState(boolean playing, int duration, int progress, @NonNull String uri, long timestamp) {
         this.playing = playing;
         this.duration = duration;
         this.progress = progress;
@@ -25,7 +25,7 @@ public class PlaybackState {
         this.timestamp = timestamp;
     }
 
-    public static PlaybackState extractFromPlayer(@Nullable SpotifyPlayer spotifyPlayer) {
+    static PlaybackState extractFromPlayer(@Nullable SpotifyPlayer spotifyPlayer) {
         boolean playing = false;
         int duration = -1;
         int progress = -1;
@@ -84,6 +84,7 @@ public class PlaybackState {
     /**
      * Returns the current uri
      */
+    @NonNull
     public String getUri() {
         return uri;
     }
