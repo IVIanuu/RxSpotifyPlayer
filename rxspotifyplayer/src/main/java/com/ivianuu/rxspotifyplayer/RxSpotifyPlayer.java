@@ -18,7 +18,6 @@ import com.spotify.sdk.android.player.SpotifyPlayer;
 
 import io.reactivex.Completable;
 import io.reactivex.CompletableEmitter;
-import io.reactivex.CompletableOnSubscribe;
 import io.reactivex.Observable;
 import io.reactivex.subjects.BehaviorSubject;
 import io.reactivex.subjects.PublishSubject;
@@ -64,12 +63,7 @@ public final class RxSpotifyPlayer {
      */
     @CheckResult @NonNull
     public Completable init(@NonNull final String accessToken) {
-        return Completable.create(new CompletableOnSubscribe() {
-            @Override
-            public void subscribe(@io.reactivex.annotations.NonNull CompletableEmitter e) throws Exception {
-                init(e, accessToken);
-            }
-        });
+        return Completable.create(e -> init(e, accessToken));
     }
 
     private void init(final CompletableEmitter e, String accessToken) {
@@ -164,29 +158,26 @@ public final class RxSpotifyPlayer {
         } else {
             uri = playContext;
         }
-        return Completable.create(new CompletableOnSubscribe() {
-            @Override
-            public void subscribe(@io.reactivex.annotations.NonNull final CompletableEmitter e) throws Exception {
-                if (isInitialized()) {
-                    player.playUri(new Player.OperationCallback() {
-                        @Override
-                        public void onSuccess() {
-                            if (!e.isDisposed()) {
-                                e.onComplete();
-                            }
+        return Completable.create(e -> {
+            if (isInitialized()) {
+                player.playUri(new Player.OperationCallback() {
+                    @Override
+                    public void onSuccess() {
+                        if (!e.isDisposed()) {
+                            e.onComplete();
                         }
-
-                        @Override
-                        public void onError(Error error) {
-                            if (!e.isDisposed()) {
-                                e.onError(new Throwable(error.name()));
-                            }
-                        }
-                    }, uri, 0, 0);
-                } else {
-                    if (!e.isDisposed()) {
-                        e.onError(new Throwable(Error.kSpErrorUninitialized.name()));
                     }
+
+                    @Override
+                    public void onError(Error error) {
+                        if (!e.isDisposed()) {
+                            e.onError(new Throwable(error.name()));
+                        }
+                    }
+                }, uri, 0, 0);
+            } else {
+                if (!e.isDisposed()) {
+                    e.onError(new Throwable(Error.kSpErrorUninitialized.name()));
                 }
             }
         });
@@ -199,29 +190,26 @@ public final class RxSpotifyPlayer {
      */
     @CheckResult @NonNull
     public Completable pause() {
-        return Completable.create(new CompletableOnSubscribe() {
-            @Override
-            public void subscribe(@io.reactivex.annotations.NonNull final CompletableEmitter e) throws Exception {
-                if (isInitialized()) {
-                    player.pause(new Player.OperationCallback() {
-                        @Override
-                        public void onSuccess() {
-                            if (!e.isDisposed()) {
-                                e.onComplete();
-                            }
+        return Completable.create(e -> {
+            if (isInitialized()) {
+                player.pause(new Player.OperationCallback() {
+                    @Override
+                    public void onSuccess() {
+                        if (!e.isDisposed()) {
+                            e.onComplete();
                         }
-
-                        @Override
-                        public void onError(Error error) {
-                            if (!e.isDisposed()) {
-                                e.onError(new Throwable(error.name()));
-                            }
-                        }
-                    });
-                } else {
-                    if (!e.isDisposed()) {
-                        e.onError(new Throwable(Error.kSpErrorUninitialized.name()));
                     }
+
+                    @Override
+                    public void onError(Error error) {
+                        if (!e.isDisposed()) {
+                            e.onError(new Throwable(error.name()));
+                        }
+                    }
+                });
+            } else {
+                if (!e.isDisposed()) {
+                    e.onError(new Throwable(Error.kSpErrorUninitialized.name()));
                 }
             }
         });
@@ -234,29 +222,26 @@ public final class RxSpotifyPlayer {
      */
     @CheckResult @NonNull
     public Completable resume() {
-        return Completable.create(new CompletableOnSubscribe() {
-            @Override
-            public void subscribe(@io.reactivex.annotations.NonNull final CompletableEmitter e) throws Exception {
-                if (isInitialized()) {
-                    player.resume(new Player.OperationCallback() {
-                        @Override
-                        public void onSuccess() {
-                            if (!e.isDisposed()) {
-                                e.onComplete();
-                            }
+        return Completable.create(e -> {
+            if (isInitialized()) {
+                player.resume(new Player.OperationCallback() {
+                    @Override
+                    public void onSuccess() {
+                        if (!e.isDisposed()) {
+                            e.onComplete();
                         }
-
-                        @Override
-                        public void onError(Error error) {
-                            if (!e.isDisposed()) {
-                                e.onError(new Throwable(error.name()));
-                            }
-                        }
-                    });
-                } else {
-                    if (!e.isDisposed()) {
-                        e.onError(new Throwable(Error.kSpErrorUninitialized.name()));
                     }
+
+                    @Override
+                    public void onError(Error error) {
+                        if (!e.isDisposed()) {
+                            e.onError(new Throwable(error.name()));
+                        }
+                    }
+                });
+            } else {
+                if (!e.isDisposed()) {
+                    e.onError(new Throwable(Error.kSpErrorUninitialized.name()));
                 }
             }
         });
@@ -283,30 +268,27 @@ public final class RxSpotifyPlayer {
      */
     @CheckResult @NonNull
     public Completable seekTo(final int position) {
-        return Completable.create(new CompletableOnSubscribe() {
-            @Override
-            public void subscribe(@io.reactivex.annotations.NonNull final CompletableEmitter e) throws Exception {
-                if (isInitialized()) {
-                    player.seekToPosition(new Player.OperationCallback() {
-                        @Override
-                        public void onSuccess() {
-                            if (!e.isDisposed()) {
-                                e.onComplete();
-                            }
-                            playbackStateSubject.onNext(PlaybackState.extractFromPlayer(player));
+        return Completable.create(e -> {
+            if (isInitialized()) {
+                player.seekToPosition(new Player.OperationCallback() {
+                    @Override
+                    public void onSuccess() {
+                        if (!e.isDisposed()) {
+                            e.onComplete();
                         }
-
-                        @Override
-                        public void onError(Error error) {
-                            if (!e.isDisposed()) {
-                                e.onError(new Throwable(error.name()));
-                            }
-                        }
-                    }, position);
-                } else {
-                    if (!e.isDisposed()) {
-                        e.onError(new Throwable(Error.kSpErrorUninitialized.name()));
+                        playbackStateSubject.onNext(PlaybackState.extractFromPlayer(player));
                     }
+
+                    @Override
+                    public void onError(Error error) {
+                        if (!e.isDisposed()) {
+                            e.onError(new Throwable(error.name()));
+                        }
+                    }
+                }, position);
+            } else {
+                if (!e.isDisposed()) {
+                    e.onError(new Throwable(Error.kSpErrorUninitialized.name()));
                 }
             }
         });
@@ -319,18 +301,15 @@ public final class RxSpotifyPlayer {
      */
     @CheckResult @NonNull
     public Completable setVolume(@FloatRange(from = 0.0f, to = 1.0f) final float volume) {
-        return Completable.create(new CompletableOnSubscribe() {
-            @Override
-            public void subscribe(@io.reactivex.annotations.NonNull CompletableEmitter e) throws Exception {
-                if (isInitialized()) {
-                    audioController.setVolume(volume);
-                    if (!e.isDisposed()) {
-                        e.onComplete();
-                    }
-                } else {
-                    if (!e.isDisposed()) {
-                        e.onError(new Throwable(Error.kSpErrorUninitialized.name()));
-                    }
+        return Completable.create(e -> {
+            if (isInitialized()) {
+                audioController.setVolume(volume);
+                if (!e.isDisposed()) {
+                    e.onComplete();
+                }
+            } else {
+                if (!e.isDisposed()) {
+                    e.onError(new Throwable(Error.kSpErrorUninitialized.name()));
                 }
             }
         });
@@ -343,35 +322,32 @@ public final class RxSpotifyPlayer {
      */
     @CheckResult @NonNull
     public Completable setConnectivity(@NonNull final NetworkInfo info) {
-        return Completable.create(new CompletableOnSubscribe() {
-            @Override
-            public void subscribe(@io.reactivex.annotations.NonNull final CompletableEmitter e) throws Exception {
-                if (isInitialized()) {
-                    Connectivity connectivity;
-                    if (info.isConnected()) {
-                        connectivity = Connectivity.fromNetworkType(info.getType());
-                    } else {
-                        connectivity = Connectivity.OFFLINE;
-                    }
-                    player.setConnectivityStatus(new Player.OperationCallback() {
-                        @Override
-                        public void onSuccess() {
-                            if (!e.isDisposed()) {
-                                e.onComplete();
-                            }
-                        }
-
-                        @Override
-                        public void onError(Error error) {
-                            if (!e.isDisposed()) {
-                                e.onError(new Throwable(error.name()));
-                            }
-                        }
-                    }, connectivity);
+        return Completable.create(e -> {
+            if (isInitialized()) {
+                Connectivity connectivity;
+                if (info.isConnected()) {
+                    connectivity = Connectivity.fromNetworkType(info.getType());
                 } else {
-                    if (!e.isDisposed()) {
-                        e.onError(new Throwable(Error.kSpErrorUninitialized.name()));
+                    connectivity = Connectivity.OFFLINE;
+                }
+                player.setConnectivityStatus(new Player.OperationCallback() {
+                    @Override
+                    public void onSuccess() {
+                        if (!e.isDisposed()) {
+                            e.onComplete();
+                        }
                     }
+
+                    @Override
+                    public void onError(Error error) {
+                        if (!e.isDisposed()) {
+                            e.onError(new Throwable(error.name()));
+                        }
+                    }
+                }, connectivity);
+            } else {
+                if (!e.isDisposed()) {
+                    e.onError(new Throwable(Error.kSpErrorUninitialized.name()));
                 }
             }
         });
@@ -384,29 +360,26 @@ public final class RxSpotifyPlayer {
      */
     @CheckResult @NonNull
     public Completable setPlaybackBitrate(@NonNull final PlaybackBitrate playbackBitrate) {
-        return Completable.create(new CompletableOnSubscribe() {
-            @Override
-            public void subscribe(@io.reactivex.annotations.NonNull final CompletableEmitter e) throws Exception {
-                if (isInitialized()) {
-                    player.setPlaybackBitrate(new Player.OperationCallback() {
-                        @Override
-                        public void onSuccess() {
-                            if (!e.isDisposed()) {
-                                e.onComplete();
-                            }
+        return Completable.create(e -> {
+            if (isInitialized()) {
+                player.setPlaybackBitrate(new Player.OperationCallback() {
+                    @Override
+                    public void onSuccess() {
+                        if (!e.isDisposed()) {
+                            e.onComplete();
                         }
-
-                        @Override
-                        public void onError(Error error) {
-                            if (!e.isDisposed()) {
-                                e.onError(new Throwable(error.name()));
-                            }
-                        }
-                    }, playbackBitrate);
-                } else {
-                    if (!e.isDisposed()) {
-                        e.onError(new Throwable(Error.kSpErrorUninitialized.name()));
                     }
+
+                    @Override
+                    public void onError(Error error) {
+                        if (!e.isDisposed()) {
+                            e.onError(new Throwable(error.name()));
+                        }
+                    }
+                }, playbackBitrate);
+            } else {
+                if (!e.isDisposed()) {
+                    e.onError(new Throwable(Error.kSpErrorUninitialized.name()));
                 }
             }
         });

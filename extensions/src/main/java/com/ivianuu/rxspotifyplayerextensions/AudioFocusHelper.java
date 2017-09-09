@@ -6,9 +6,6 @@ import android.support.annotation.NonNull;
 
 import com.ivianuu.rxspotifyplayer.RxSpotifyPlayer;
 
-import io.reactivex.functions.Action;
-import io.reactivex.functions.Consumer;
-
 /**
  * Automatically handles audio focus
  */
@@ -64,64 +61,31 @@ public class AudioFocusHelper implements AudioManager.OnAudioFocusChangeListener
     public void onAudioFocusChange(int focusChange) {
         switch (focusChange) {
             case AudioManager.AUDIOFOCUS_LOSS:
-                player.pause().subscribe(new Action() {
-                    @Override
-                    public void run() throws Exception {
+                player.pause().subscribe(() -> {
 
-                    }
-                }, new Consumer<Throwable>() {
-                    @Override
-                    public void accept(@io.reactivex.annotations.NonNull Throwable throwable) throws Exception {
+                }, throwable -> {
 
-                    }
                 });
                 break;
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
                 if (player.getPlaybackState().isPlaying()) {
-                    player.pause().subscribe(new Action() {
-                        @Override
-                        public void run() throws Exception {
-                            shouldPlayOnFocusGain = true;
-                        }
-                    }, new Consumer<Throwable>() {
-                        @Override
-                        public void accept(@io.reactivex.annotations.NonNull Throwable throwable) throws Exception {}
-                    });
+                    player.pause().subscribe(() -> shouldPlayOnFocusGain = true,
+                            throwable -> {});
                 }
                 break;
             case AudioManager.AUDIOFOCUS_GAIN:
                 if (!isDucking && shouldPlayOnFocusGain) {
-                    player.resume().subscribe(new Action() {
-                        @Override
-                        public void run() throws Exception {
+                    player.resume().subscribe(() -> {
 
-                        }
-                    }, new Consumer<Throwable>() {
-                        @Override
-                        public void accept(@io.reactivex.annotations.NonNull Throwable throwable) throws Exception {}
-                    });
+                    }, throwable -> {});
                 } else {
-                    player.setVolume(1.0f).subscribe(new Action() {
-                        @Override
-                        public void run() throws Exception {
-                            isDucking = false;
-                        }
-                    }, new Consumer<Throwable>() {
-                        @Override
-                        public void accept(@io.reactivex.annotations.NonNull Throwable throwable) throws Exception {}
-                    });
+                    player.setVolume(1.0f).subscribe(() -> isDucking = false, throwable -> {});
                 }
                 break;
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
-                player.setVolume(0.1f).subscribe(new Action() {
-                    @Override
-                    public void run() throws Exception {
-                        isDucking = true;
-                    }
-                }, new Consumer<Throwable>() {
-                    @Override
-                    public void accept(@io.reactivex.annotations.NonNull Throwable throwable) throws Exception {}
-                });
+                player.setVolume(0.1f).subscribe(
+                        () -> isDucking = true,
+                        throwable -> {});
                 break;
         }
     }
