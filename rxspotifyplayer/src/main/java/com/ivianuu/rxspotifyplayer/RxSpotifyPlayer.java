@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.NetworkInfo;
 import android.support.annotation.CheckResult;
 import android.support.annotation.FloatRange;
+import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 
 import com.spotify.sdk.android.player.Config;
@@ -21,6 +22,10 @@ import io.reactivex.CompletableEmitter;
 import io.reactivex.Observable;
 import io.reactivex.subjects.BehaviorSubject;
 import io.reactivex.subjects.PublishSubject;
+
+import static com.ivianuu.preconditions.Preconditions.checkArgumentInRange;
+import static com.ivianuu.preconditions.Preconditions.checkNonnegative;
+import static com.ivianuu.preconditions.Preconditions.checkNotNull;
 
 /**
  * Rx spotify player
@@ -53,6 +58,8 @@ public final class RxSpotifyPlayer {
      */
     @NonNull
     public static RxSpotifyPlayer create(@NonNull Context context, @NonNull String clientId) {
+        checkNotNull(context, "context == null");
+        checkNotNull(clientId, "clientId == null");
         return new RxSpotifyPlayer(context, clientId);
     }
 
@@ -63,6 +70,7 @@ public final class RxSpotifyPlayer {
      */
     @CheckResult @NonNull
     public Completable init(@NonNull final String accessToken) {
+        checkNotNull(accessToken, "accessToken == null");
         return Completable.create(e -> init(e, accessToken));
     }
 
@@ -152,6 +160,7 @@ public final class RxSpotifyPlayer {
      */
     @CheckResult @NonNull
     public Completable play(@NonNull String playContext) {
+        checkNotNull(playContext, "playContext == null");
         final String uri;
         if (!playContext.contains(URI_PREFIX)) {
             uri = URI_PREFIX + playContext;
@@ -267,7 +276,8 @@ public final class RxSpotifyPlayer {
      * Seeks to the specified position
      */
     @CheckResult @NonNull
-    public Completable seekTo(final int position) {
+    public Completable seekTo(@IntRange(from = 0) final int position) {
+        checkNonnegative(position, "position must be 0 or greater");
         return Completable.create(e -> {
             if (isInitialized()) {
                 player.seekToPosition(new Player.OperationCallback() {
@@ -300,7 +310,8 @@ public final class RxSpotifyPlayer {
      * Sets the volume
      */
     @CheckResult @NonNull
-    public Completable setVolume(@FloatRange(from = 0.0f, to = 1.0f) final float volume) {
+    public Completable setVolume(@FloatRange(from = 0f, to = 1f) final float volume) {
+        checkArgumentInRange(volume, 0f, 1f, "volume");
         return Completable.create(e -> {
             if (isInitialized()) {
                 audioController.setVolume(volume);
@@ -322,6 +333,7 @@ public final class RxSpotifyPlayer {
      */
     @CheckResult @NonNull
     public Completable setConnectivity(@NonNull final NetworkInfo info) {
+        checkNotNull(info, "info == null");
         return Completable.create(e -> {
             if (isInitialized()) {
                 Connectivity connectivity;
@@ -360,6 +372,7 @@ public final class RxSpotifyPlayer {
      */
     @CheckResult @NonNull
     public Completable setPlaybackBitrate(@NonNull final PlaybackBitrate playbackBitrate) {
+        checkNotNull(playbackBitrate, "playbackBitrate == null");
         return Completable.create(e -> {
             if (isInitialized()) {
                 player.setPlaybackBitrate(new Player.OperationCallback() {

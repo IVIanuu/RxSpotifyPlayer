@@ -14,6 +14,8 @@ import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
 
+import static com.ivianuu.preconditions.Preconditions.checkNotNull;
+
 /**
  * Noisy helper
  */
@@ -28,6 +30,8 @@ public final class NoisyHelper {
      */
     @CheckResult @NonNull
     public static Observable<Object> with(@NonNull final Context context, @NonNull final RxSpotifyPlayer player) {
+        checkNotNull(context, "context == null");
+        checkNotNull(player, "player == null");
         return Observable.create(new ObservableOnSubscribe<Object>() {
 
             private boolean noisyReceiverRegistered;

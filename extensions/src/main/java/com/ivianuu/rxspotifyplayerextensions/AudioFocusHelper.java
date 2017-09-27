@@ -6,6 +6,8 @@ import android.support.annotation.NonNull;
 
 import com.ivianuu.rxspotifyplayer.RxSpotifyPlayer;
 
+import static com.ivianuu.preconditions.Preconditions.checkNotNull;
+
 /**
  * Automatically handles audio focus
  */
@@ -28,6 +30,8 @@ public class AudioFocusHelper implements AudioManager.OnAudioFocusChangeListener
      * Returns a new audio focus helper
      */
     public static AudioFocusHelper create(@NonNull Context context, @NonNull RxSpotifyPlayer player) {
+        checkNotNull(context, "context == null");
+        checkNotNull(player, "player == null");
         return new AudioFocusHelper(context, player);
     }
 

@@ -11,6 +11,8 @@ import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
 
+import static com.ivianuu.preconditions.Preconditions.checkNotNull;
+
 /**
  * Progress update helper
  */
@@ -25,6 +27,7 @@ public final class ProgressUpdateHelper {
      */
     @CheckResult @NonNull
     public static Observable<PlaybackProgress> from(@NonNull final Observable<PlaybackState> playbackStateObservable) {
+        checkNotNull(playbackStateObservable, "playbackStateObservable == null");
         return Observable.create(new ObservableOnSubscribe<PlaybackProgress>() {
 
             private PlaybackState playbackState;
