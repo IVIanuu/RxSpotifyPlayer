@@ -30,6 +30,7 @@ dependencies {
 
     // Spotify Sdk
     api project(':spotifysdk')
+
 }
 
 // build a jar with source files
