@@ -6,7 +6,7 @@ import android.support.annotation.NonNull;
 
 import com.ivianuu.rxspotifyplayer.RxSpotifyPlayer;
 
-import static com.ivianuu.preconditions.Preconditions.checkNotNull;
+import static com.ivianuu.rxspotifyplayer.Preconditions.checkNotNull;
 
 /**
  * Automatically handles audio focus

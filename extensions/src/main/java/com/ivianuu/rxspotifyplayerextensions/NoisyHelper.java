@@ -14,7 +14,7 @@ import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
 
-import static com.ivianuu.preconditions.Preconditions.checkNotNull;
+import static com.ivianuu.rxspotifyplayer.Preconditions.checkNotNull;
 
 /**
  * Noisy helper

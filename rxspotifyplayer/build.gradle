@@ -25,9 +25,6 @@ dependencies {
     // RxJava
     api rootProject.ext.rxJava
 
-    // Preconditions
-    api rootProject.ext.preconditions
-
     // Spotify Sdk
     api project(':spotifysdk')
 

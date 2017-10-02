@@ -23,9 +23,7 @@ import io.reactivex.Observable;
 import io.reactivex.subjects.BehaviorSubject;
 import io.reactivex.subjects.PublishSubject;
 
-import static com.ivianuu.preconditions.Preconditions.checkArgumentInRange;
-import static com.ivianuu.preconditions.Preconditions.checkNonnegative;
-import static com.ivianuu.preconditions.Preconditions.checkNotNull;
+import static com.ivianuu.rxspotifyplayer.Preconditions.checkNotNull;
 
 /**
  * Rx spotify player
@@ -277,7 +275,6 @@ public final class RxSpotifyPlayer {
      */
     @CheckResult @NonNull
     public Completable seekTo(@IntRange(from = 0) final int position) {
-        checkNonnegative(position, "position must be 0 or greater");
         return Completable.create(e -> {
             if (isInitialized()) {
                 player.seekToPosition(new Player.OperationCallback() {
@@ -311,7 +308,6 @@ public final class RxSpotifyPlayer {
      */
     @CheckResult @NonNull
     public Completable setVolume(@FloatRange(from = 0f, to = 1f) final float volume) {
-        checkArgumentInRange(volume, 0f, 1f, "volume");
         return Completable.create(e -> {
             if (isInitialized()) {
                 audioController.setVolume(volume);
